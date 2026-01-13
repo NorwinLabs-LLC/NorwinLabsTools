@@ -38,6 +38,26 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    applicationVariants.all {
+        val variant = this
+        variant.outputs.all {
+            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            val fileName = "NorwinLabsTools-${variant.versionName}.apk"
+            output.outputFileName = fileName
+        }
+    }
+}
+
+tasks.register<Copy>("copyApkToReleases") {
+    group = "build"
+    description = "Copies the release APK to the releases folder."
+    
+    from("build/outputs/apk/release")
+    into("../releases")
+    include("*.apk")
+    
+    dependsOn("assembleRelease")
 }
 
 dependencies {
