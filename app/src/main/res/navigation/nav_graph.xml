@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_FirstFragment_to_CalendarFragment"
             app:destination="@id/CalendarFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_NetScannerFragment"
+            app:destination="@id/NetScannerFragment" />
     </fragment>
     
     <fragment
@@ -52,5 +55,11 @@
         android:name="com.example.norwinlabstools.CalendarFragment"
         android:label="Calendar"
         tools:layout="@layout/fragment_calendar" />
+
+    <fragment
+        android:id="@+id/NetScannerFragment"
+        android:name="com.example.norwinlabstools.NetScannerFragment"
+        android:label="Net Scanner"
+        tools:layout="@layout/fragment_net_scanner" />
 
 </navigation>

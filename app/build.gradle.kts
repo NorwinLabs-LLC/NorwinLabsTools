@@ -160,6 +160,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.okhttp)
     implementation(libs.glide)
+    implementation(libs.generativeai)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

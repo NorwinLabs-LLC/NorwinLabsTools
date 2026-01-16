@@ -1,6 +1,6 @@
 NorwinLabsTools Build Information
 --------------------------------
-Version Name: 1.0.10
-Build Number: 12
-Build Date:   2026-01-14 17:01:20
+Version Name: 1.0.13
+Build Number: 15
+Build Date:   2026-01-15 12:04:10
 Build Type:   Automated Internal Build

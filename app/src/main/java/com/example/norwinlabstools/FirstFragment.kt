@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.norwinlabstools.databinding.FragmentFirstBinding
 import com.example.norwinlabstools.databinding.LayoutAddToolsBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class FirstFragment : Fragment() {
@@ -28,6 +30,7 @@ class FirstFragment : Fragment() {
     private var _binding: FragmentFirstBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: ToolsAdapter
+    private val aiManager = VideoIdeaManager()
 
     private val PREFS_NAME = "norwin_prefs"
     private val KEY_HOME_TOOLS = "home_tools_ids"
@@ -39,17 +42,14 @@ class FirstFragment : Fragment() {
         Tool(4, "Settings", android.R.drawable.ic_menu_manage, "1.0.1", 0xFF455A64.toInt(), "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=500&auto=format&fit=crop"),
         Tool(5, "About", android.R.drawable.ic_menu_info_details, "NR", 0xFF4527A0.toInt(), "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=500&auto=format&fit=crop"),
         Tool(9, "Idea Generator", R.drawable.ic_lightbulb, "1.0.1", 0xFFF9A825.toInt(), "https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=500&auto=format&fit=crop"),
-        Tool(10, "Color Picker", android.R.drawable.ic_menu_gallery, "NR", 0xFFAD1457.toInt(), "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=500&auto=format&fit=crop"),
-        Tool(11, "Dice Roller", android.R.drawable.ic_menu_help, "NR", 0xFF00838F.toInt(), "https://images.unsplash.com/photo-1553481187-be93c21490a9?q=80&w=500&auto=format&fit=crop"),
         Tool(12, "Update", android.R.drawable.ic_menu_upload, "1.0.1", 0xFFC62828.toInt(), "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=500&auto=format&fit=crop"),
         Tool(13, "Windhelm", android.R.drawable.ic_menu_view, "1.0.2", 0xFF283593.toInt(), "http://windhelmthegame.ddns.net/background.png"),
-        Tool(14, "Lore Gen", android.R.drawable.ic_menu_sort_alphabetically, "NR", 0xFF4E342E.toInt(), "https://images.unsplash.com/photo-1505664194779-8beaceb93744?q=80&w=500&auto=format&fit=crop"),
         Tool(15, "UE5 Guide", android.R.drawable.ic_menu_directions, "NR", 0xFF00695C.toInt(), "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=500&auto=format&fit=crop"),
         Tool(16, "Trello", android.R.drawable.ic_menu_agenda, "1.0.1", 0xFF0079BF.toInt(), "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=500&auto=format&fit=crop"),
         Tool(17, "SSH Client", android.R.drawable.ic_dialog_dialer, "NR", 0xFF37474F.toInt(), "https://images.unsplash.com/photo-1629654297299-c8506221ca97?q=80&w=500&auto=format&fit=crop"),
         Tool(18, "Ping Tool", android.R.drawable.ic_menu_revert, "NR", 0xFF0091EA.toInt(), "https://images.unsplash.com/photo-1558494949-ef010ca73324?q=80&w=500&auto=format&fit=crop"),
-        Tool(19, "Pass Gen", android.R.drawable.ic_lock_lock, "NR", 0xFF607D8B.toInt(), "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=500&auto=format&fit=crop"),
-        Tool(20, "Net Scanner", android.R.drawable.ic_menu_share, "NR", 0xFF546E7A.toInt(), "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=500&auto=format&fit=crop")
+        Tool(20, "Net Scanner", android.R.drawable.ic_menu_share, "1.0.2", 0xFF546E7A.toInt(), "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=500&auto=format&fit=crop"),
+        Tool(21, "Video Ideas", android.R.drawable.ic_menu_slideshow, "1.0.3", 0xFFE91E63.toInt(), "https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=500&auto=format&fit=crop")
     )
 
     private var currentTools = mutableListOf<Tool>()
@@ -102,6 +102,8 @@ class FirstFragment : Fragment() {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://trello.com/b/SVY6LFSZ/windhelm-main-development"))
                             startActivity(intent)
                         }
+                        20 -> findNavController().navigate(R.id.action_FirstFragment_to_NetScannerFragment)
+                        21 -> showVideoIdeaCategoryDialog()
                         else -> {
                              AlertDialog.Builder(requireContext())
                                 .setTitle(tool.name)
@@ -162,6 +164,61 @@ class FirstFragment : Fragment() {
 
         setupFooter()
         autoCheckForUpdates()
+    }
+
+    private fun showVideoIdeaCategoryDialog() {
+        val categories = arrayOf("Windhelm (Game)", "UE5 / Game Dev")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Select Category")
+            .setItems(categories) { _, which ->
+                val category = if (which == 0) "Windhelm" else "General"
+                showVideoIdeaTypeDialog(category)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showVideoIdeaTypeDialog(category: String) {
+        val options = arrayOf("YouTube Short", "Long-Form Video")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Select Format ($category)")
+            .setItems(options) { _, which ->
+                generateAIVideoIdea(isShort = (which == 0), category = category)
+            }
+            .setNegativeButton("Back") { _, _ -> showVideoIdeaCategoryDialog() }
+            .show()
+    }
+
+    private fun generateAIVideoIdea(isShort: Boolean, category: String) {
+        val loadingDialog = AlertDialog.Builder(requireContext())
+            .setTitle("Consulting AI...")
+            .setMessage("Generating a custom idea for $category...")
+            .setCancelable(false)
+            .show()
+
+        lifecycleScope.launch {
+            aiManager.generateIdea(isShort, category, object : VideoIdeaManager.VideoIdeaCallback {
+                override fun onSuccess(idea: String) {
+                    loadingDialog.dismiss()
+                    activity?.runOnUiThread {
+                        AlertDialog.Builder(requireContext())
+                            .setTitle(if (isShort) "AI Short Idea" else "AI Video Idea")
+                            .setMessage(idea)
+                            .setPositiveButton("Generate Another") { _, _ -> generateAIVideoIdea(isShort, category) }
+                            .setNeutralButton("Change Settings") { _, _ -> showVideoIdeaCategoryDialog() }
+                            .setNegativeButton("Close", null)
+                            .show()
+                    }
+                }
+
+                override fun onError(error: String) {
+                    loadingDialog.dismiss()
+                    activity?.runOnUiThread {
+                        Toast.makeText(requireContext(), "AI Error: $error", Toast.LENGTH_LONG).show()
+                    }
+                }
+            })
+        }
     }
 
     private fun showIdeaGenerator() {
