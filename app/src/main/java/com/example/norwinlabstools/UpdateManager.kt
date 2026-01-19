@@ -12,7 +12,7 @@ class UpdateManager(private val context: Context) {
     // Check if these match your GitHub URL exactly: https://github.com/OWNER/REPO
     private val GITHUB_OWNER = "NorwinLabs"
 
-    private val GITHUB_ORG = "NorwinLabs-LLC"
+    private val GITHUB_ORG = ""
     private val GITHUB_REPO = "NorwinLabsTools"
     
     private val GITHUB_API_URL = "https://api.github.com/repos/$GITHUB_ORG/$GITHUB_REPO/releases/latest"

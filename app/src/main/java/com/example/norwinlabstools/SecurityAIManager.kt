@@ -5,10 +5,8 @@ import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class SecurityAIManager {
+class SecurityAIManager(private val apiKey: String) {
 
-    private val apiKey = "YOUR_GEMINI_API_KEY_HERE"
-    
     private val model = GenerativeModel(
         modelName = "gemini-1.5-flash",
         apiKey = apiKey
@@ -20,6 +18,11 @@ class SecurityAIManager {
     }
 
     suspend fun analyzeVulnerabilities(ip: String, openPorts: List<String>, callback: SecurityCallback) {
+        if (apiKey.isEmpty() || apiKey == "YOUR_GEMINI_API_KEY_HERE") {
+            callback.onError("API Key is missing. Please set it in Settings.")
+            return
+        }
+
         if (openPorts.isEmpty()) {
             callback.onSuccess("No common vulnerabilities detected on this device.")
             return

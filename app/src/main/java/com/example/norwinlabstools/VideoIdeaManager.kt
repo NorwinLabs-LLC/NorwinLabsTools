@@ -5,12 +5,8 @@ import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class VideoIdeaManager {
+class VideoIdeaManager(private val apiKey: String) {
 
-    // WARNING: For production apps, never hardcode your API key. 
-    // Use secrets.properties or a backend service.
-    private val apiKey = "YOUR_GEMINI_API_KEY_HERE"
-    
     private val model = GenerativeModel(
         modelName = "gemini-1.5-flash",
         apiKey = apiKey
@@ -22,6 +18,11 @@ class VideoIdeaManager {
     }
 
     suspend fun generateIdea(isShort: Boolean, category: String = "General", callback: VideoIdeaCallback) {
+        if (apiKey.isEmpty() || apiKey == "YOUR_GEMINI_API_KEY_HERE") {
+            callback.onError("API Key is missing. Please set it in Settings.")
+            return
+        }
+
         val prompt = when (category) {
             "Windhelm" -> if (isShort) {
                 "Generate a highly engaging YouTube Short idea for a PC game called 'Windhelm' built in Unreal Engine 5.7. Focus on a quick hook, a technical hack, or a visually stunning moment. Keep the response under 30 words."

@@ -74,10 +74,12 @@ tasks.register("incrementVersion") {
     group = "versioning"
     description = "Increments the version code and name in version.properties"
     
+    val propsFile = versionPropsFile
+    
     doLast {
         val props = Properties()
-        if (versionPropsFile.exists()) {
-            versionPropsFile.inputStream().use { props.load(it) }
+        if (propsFile.exists()) {
+            propsFile.inputStream().use { props.load(it) }
         }
         
         val currentCode = props.getProperty("VERSION_CODE", "1").toInt()
@@ -93,7 +95,7 @@ tasks.register("incrementVersion") {
             props.setProperty("VERSION_NAME", nextName)
         }
         
-        versionPropsFile.outputStream().use { props.store(it, "Auto-incremented build version") }
+        propsFile.outputStream().use { props.store(it, "Auto-incremented build version") }
         println("Version incremented to ${props.getProperty("VERSION_NAME")} (Code: $nextCode)")
     }
 }
@@ -103,18 +105,21 @@ tasks.register("createBuildInfo") {
     group = "build"
     description = "Generates a build-info.txt file in the releases folder"
     
+    val releaseDirFile = rootProject.layout.projectDirectory.dir("releases").asFile
+    val currentVerName = verName
+    val currentVerCode = verCode
+    
     doLast {
-        val releaseDir = rootProject.layout.projectDirectory.dir("releases").asFile
-        if (!releaseDir.exists()) releaseDir.mkdirs()
+        if (!releaseDirFile.exists()) releaseDirFile.mkdirs()
         
         val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-        val infoFile = File(releaseDir, "latest-build-info.txt")
+        val infoFile = File(releaseDirFile, "latest-build-info.txt")
         
         infoFile.writeText("""
             NorwinLabsTools Build Information
             --------------------------------
-            Version Name: ${verName}
-            Build Number: ${verCode}
+            Version Name: ${currentVerName}
+            Build Number: ${currentVerCode}
             Build Date:   ${timestamp}
             Build Type:   Automated Internal Build
         """.trimIndent())
@@ -161,6 +166,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.glide)
     implementation(libs.generativeai)
+    implementation(libs.androidx.biometric)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

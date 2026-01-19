@@ -30,10 +30,12 @@ class FirstFragment : Fragment() {
     private var _binding: FragmentFirstBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: ToolsAdapter
-    private val aiManager = VideoIdeaManager()
+    private var aiManager: VideoIdeaManager? = null
 
     private val PREFS_NAME = "norwin_prefs"
     private val KEY_HOME_TOOLS = "home_tools_ids"
+    private val KEY_BIOMETRIC = "enable_biometric"
+    private val KEY_API_KEY = "gemini_api_key"
 
     private val allTools = listOf(
         Tool(1, "Calendar", android.R.drawable.ic_menu_today, "1.0.2", 0xFF2E7D32.toInt(), "https://images.unsplash.com/photo-1506784365847-bbad939e9335?q=80&w=500&auto=format&fit=crop"),
@@ -49,7 +51,9 @@ class FirstFragment : Fragment() {
         Tool(17, "SSH Client", android.R.drawable.ic_dialog_dialer, "NR", 0xFF37474F.toInt(), "https://images.unsplash.com/photo-1629654297299-c8506221ca97?q=80&w=500&auto=format&fit=crop"),
         Tool(18, "Ping Tool", android.R.drawable.ic_menu_revert, "NR", 0xFF0091EA.toInt(), "https://images.unsplash.com/photo-1558494949-ef010ca73324?q=80&w=500&auto=format&fit=crop"),
         Tool(20, "Net Scanner", android.R.drawable.ic_menu_share, "1.0.2", 0xFF546E7A.toInt(), "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=500&auto=format&fit=crop"),
-        Tool(21, "Video Ideas", android.R.drawable.ic_menu_slideshow, "1.0.3", 0xFFE91E63.toInt(), "https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=500&auto=format&fit=crop")
+        Tool(21, "Video Ideas", android.R.drawable.ic_menu_slideshow, "1.0.3", 0xFFE91E63.toInt(), "https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=500&auto=format&fit=crop"),
+        Tool(22, "Dev News", android.R.drawable.ic_menu_recent_history, "1.0.1", 0xFF2E7D32.toInt(), "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=500&auto=format&fit=crop"),
+        Tool(23, "Bug Report", android.R.drawable.ic_menu_report_image, "1.0.0", 0xFFC62828.toInt(), "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=500&auto=format&fit=crop")
     )
 
     private var currentTools = mutableListOf<Tool>()
@@ -102,8 +106,10 @@ class FirstFragment : Fragment() {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://trello.com/b/SVY6LFSZ/windhelm-main-development"))
                             startActivity(intent)
                         }
-                        20 -> findNavController().navigate(R.id.action_FirstFragment_to_NetScannerFragment)
+                        20 -> checkBiometricAndNavigate(R.id.action_FirstFragment_to_NetScannerFragment)
                         21 -> showVideoIdeaCategoryDialog()
+                        22 -> findNavController().navigate(R.id.action_FirstFragment_to_DevNewsFragment)
+                        23 -> findNavController().navigate(R.id.action_FirstFragment_to_BugReportFragment)
                         else -> {
                              AlertDialog.Builder(requireContext())
                                 .setTitle(tool.name)
@@ -162,8 +168,35 @@ class FirstFragment : Fragment() {
             checkForUpdates()
         }
 
-        setupFooter()
+        setupHeaderAndFooter()
         autoCheckForUpdates()
+    }
+
+    private fun checkBiometricAndNavigate(destinationId: Int) {
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val isBiometricEnabled = prefs.getBoolean(KEY_BIOMETRIC, false)
+        val biometricHelper = BiometricHelper(requireActivity())
+
+        if (isBiometricEnabled && biometricHelper.canAuthenticate()) {
+            biometricHelper.showBiometricPrompt(
+                "Restricted Tool",
+                "Authentication Required",
+                "Please authenticate to access this tool.",
+                object : BiometricHelper.BiometricCallback {
+                    override fun onAuthenticationSuccess() {
+                        findNavController().navigate(destinationId)
+                    }
+                    override fun onAuthenticationError(error: String) {
+                        Toast.makeText(requireContext(), "Auth Error: $error", Toast.LENGTH_SHORT).show()
+                    }
+                    override fun onAuthenticationFailed() {
+                        Toast.makeText(requireContext(), "Authentication failed", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
+        } else {
+            findNavController().navigate(destinationId)
+        }
     }
 
     private fun showVideoIdeaCategoryDialog() {
@@ -190,6 +223,25 @@ class FirstFragment : Fragment() {
     }
 
     private fun generateAIVideoIdea(isShort: Boolean, category: String) {
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val apiKey = prefs.getString(KEY_API_KEY, "") ?: ""
+        
+        if (apiKey.isEmpty()) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("API Key Required")
+                .setMessage("Please set your Gemini API key in Settings to use AI features.")
+                .setPositiveButton("Go to Settings") { _, _ ->
+                    findNavController().navigate(R.id.action_FirstFragment_to_SettingsFragment)
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+            return
+        }
+
+        if (aiManager == null) {
+            aiManager = VideoIdeaManager(apiKey)
+        }
+
         val loadingDialog = AlertDialog.Builder(requireContext())
             .setTitle("Consulting AI...")
             .setMessage("Generating a custom idea for $category...")
@@ -197,7 +249,7 @@ class FirstFragment : Fragment() {
             .show()
 
         lifecycleScope.launch {
-            aiManager.generateIdea(isShort, category, object : VideoIdeaManager.VideoIdeaCallback {
+            aiManager?.generateIdea(isShort, category, object : VideoIdeaManager.VideoIdeaCallback {
                 override fun onSuccess(idea: String) {
                     loadingDialog.dismiss()
                     activity?.runOnUiThread {
@@ -350,13 +402,17 @@ class FirstFragment : Fragment() {
         }
     }
 
-    private fun setupFooter() {
-        try {
+    private fun setupHeaderAndFooter() {
+        val versionName = try {
             val pInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
-            binding.textviewVersion.text = "Version ${pInfo.versionName}"
+            pInfo.versionName
         } catch (e: Exception) {
-            binding.textviewVersion.text = "Version 1.0"
+            "1.0.0"
         }
+        
+        binding.textviewHeaderVersion.text = "v$versionName"
+        binding.textviewVersion.text = "Version $versionName"
+
         val year = Calendar.getInstance().get(Calendar.YEAR)
         binding.textviewCopyright.text = "© $year NorwinLabs"
     }

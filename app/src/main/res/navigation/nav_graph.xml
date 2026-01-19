@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/FirstFragment"
         android:name="com.example.norwinlabstools.FirstFragment"
-        android:label="NorwinLabs Tools"
+        android:label=""
         tools:layout="@layout/fragment_first">
 
         <action
@@ -26,6 +26,12 @@
         <action
             android:id="@+id/action_FirstFragment_to_NetScannerFragment"
             app:destination="@id/NetScannerFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_DevNewsFragment"
+            app:destination="@id/DevNewsFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_BugReportFragment"
+            app:destination="@id/BugReportFragment" />
     </fragment>
     
     <fragment
@@ -61,5 +67,17 @@
         android:name="com.example.norwinlabstools.NetScannerFragment"
         android:label="Net Scanner"
         tools:layout="@layout/fragment_net_scanner" />
+
+    <fragment
+        android:id="@+id/DevNewsFragment"
+        android:name="com.example.norwinlabstools.DevNewsFragment"
+        android:label="Dev &amp; Accessibility News"
+        tools:layout="@layout/fragment_dev_news" />
+
+    <fragment
+        android:id="@+id/BugReportFragment"
+        android:name="com.example.norwinlabstools.BugReportFragment"
+        android:label="Report a Bug"
+        tools:layout="@layout/fragment_bug_report" />
 
 </navigation>

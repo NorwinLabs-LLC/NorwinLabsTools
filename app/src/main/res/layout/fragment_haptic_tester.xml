@@ -1,74 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Test Haptic Patterns"
-        android:textAppearance="?attr/textAppearanceHeadline5"
-        android:layout_marginBottom="8dp" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Use these to test how different feedback constants feel for your game's UI."
-        android:textAppearance="?attr/textAppearanceBody2"
-        android:layout_marginBottom="24dp" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="2dp">
-
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp">
+            android:text="Haptic Laboratory"
+            android:textAppearance="?attr/textAppearanceHeadline5"
+            android:layout_marginBottom="8dp" />
 
-            <Button
-                android:id="@+id/btn_haptic_confirm"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test interaction haptics for game UI elements and system feedback."
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Standard Feedback"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Confirm / Success"
-                android:textAlignment="viewStart"
-                app:icon="@android:drawable/checkbox_on_background" />
+                android:orientation="vertical"
+                android:padding="8dp">
 
-            <Button
-                android:id="@+id/btn_haptic_reject"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_haptic_confirm"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Confirm / Success"
+                    android:textAlignment="viewStart"
+                    app:icon="@android:drawable/checkbox_on_background" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_haptic_reject"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Reject / Error"
+                    android:textAlignment="viewStart"
+                    app:icon="@android:drawable/ic_delete" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UI Sensations"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Reject / Error"
-                android:textAlignment="viewStart"
-                app:icon="@android:drawable/ic_delete" />
+                android:orientation="vertical"
+                android:padding="8dp">
 
-            <Button
-                android:id="@+id/btn_haptic_clock"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Clock Tick (Light)"
-                android:textAlignment="viewStart"
-                app:icon="@android:drawable/ic_menu_recent_history" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_haptic_clock"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Clock Tick (Light)"
+                    android:textAlignment="viewStart"
+                    app:icon="@android:drawable/ic_menu_recent_history" />
 
-            <Button
-                android:id="@+id/btn_haptic_long"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Heavy Long Press"
-                android:textAlignment="viewStart"
-                app:icon="@android:drawable/ic_menu_info_details" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_haptic_long"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Heavy Long Press"
+                    android:textAlignment="viewStart"
+                    app:icon="@android:drawable/ic_menu_info_details" />
 
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_haptic_context"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Context Click"
+                    android:textAlignment="viewStart"
+                    app:icon="@android:drawable/ic_menu_add" />
 
-</LinearLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_haptic_gesture"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Gesture Start"
+                    android:textAlignment="viewStart"
+                    app:icon="@android:drawable/ic_menu_directions" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>

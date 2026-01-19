@@ -1,5 +1,6 @@
 package com.example.norwinlabstools
 
+import android.os.Build
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
@@ -38,6 +39,18 @@ class HapticTesterFragment : Fragment() {
 
         binding.btnHapticLong.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        }
+
+        binding.btnHapticContext.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                it.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            }
+        }
+
+        binding.btnHapticGesture.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                it.performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
+            }
         }
     }
 
