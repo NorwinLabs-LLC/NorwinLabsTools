@@ -23,6 +23,8 @@ if (versionPropsFile.exists()) {
 
 val verCode = versionProps["VERSION_CODE"].toString().toInt()
 val verName = versionProps["VERSION_NAME"].toString()
+// Include seconds (ss) to ensure every build gets a unique filename in the releases folder
+val buildTimestamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(Date())
 
 android {
     namespace = "com.example.norwinlabstools"
@@ -58,12 +60,12 @@ android {
         viewBinding = true
     }
 
-    // 2. Custom APK Naming: Renames the output file to include version info and build number
+    // 2. Custom APK Naming: Renames the output file to include version info, build number, and precise timestamp
     applicationVariants.all {
         val variant = this
         variant.outputs.all {
             val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            val fileName = "NorwinLabsTools-v${variant.versionName}-b${variant.versionCode}-${variant.name}.apk"
+            val fileName = "NorwinLabsTools-v${variant.versionName}-b${variant.versionCode}-${variant.name}-$buildTimestamp.apk"
             output.outputFileName = fileName
         }
     }
@@ -133,6 +135,7 @@ tasks.register<Copy>("copyApkToReleases") {
     group = "build"
     description = "Copies the generated APKs to the project-level releases folder."
     
+    // Use a broad search to ensure we catch APKs regardless of subfolder (debug/release)
     from(layout.buildDirectory.dir("outputs/apk"))
     into(rootProject.layout.projectDirectory.dir("releases"))
     include("**/*.apk")
@@ -140,18 +143,18 @@ tasks.register<Copy>("copyApkToReleases") {
     
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     
-    // Flatten directory structure so APKs land directly in /releases
+    // Flatten directory structure so APKs land directly in /releases with their unique names
     eachFile {
         path = name
     }
-    
-    finalizedBy("createBuildInfo")
 }
 
 // 6. Automation Hook: Ensures incrementing happens before build and copying happens after
 tasks.configureEach {
     if (name.startsWith("assemble")) {
         dependsOn("incrementVersion")
+        // Create build info first, then copy everything to releases
+        finalizedBy("createBuildInfo")
         finalizedBy("copyApkToReleases")
     }
 }
