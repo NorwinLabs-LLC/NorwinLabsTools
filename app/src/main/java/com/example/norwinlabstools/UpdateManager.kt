@@ -96,11 +96,8 @@ class UpdateManager(private val context: Context) {
         }
         
         val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(onComplete, filter, Context.RECEIVER_EXPORTED)
-        } else {
-            context.registerReceiver(onComplete, filter)
-        }
+        // Use ContextCompat to handle RECEIVER_EXPORTED requirement on API 34+
+        ContextCompat.registerReceiver(context, onComplete, filter, ContextCompat.RECEIVER_EXPORTED)
     }
 
     private fun installApk(file: File) {
