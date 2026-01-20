@@ -32,12 +32,13 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Divider -->
-    <View
+    <!-- Divider (Using a simple FrameLayout instead of View) -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#44FFFFFF"
-        android:layout_marginVertical="4dp" />
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp" />
 
     <!-- Shortcuts Row -->
     <LinearLayout
@@ -55,7 +56,8 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="Calculator" />
 
-        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+        <!-- Spacers (Using FrameLayout instead of View) -->
+        <FrameLayout android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/btn_notes"
@@ -66,7 +68,7 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="Notes" />
 
-        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/btn_settings"
