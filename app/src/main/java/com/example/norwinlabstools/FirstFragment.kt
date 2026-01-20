@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.norwinlabstools.databinding.FragmentFirstBinding
 import com.example.norwinlabstools.databinding.LayoutAddToolsBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class FirstFragment : Fragment() {
@@ -28,28 +30,30 @@ class FirstFragment : Fragment() {
     private var _binding: FragmentFirstBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: ToolsAdapter
+    private var aiManager: VideoIdeaManager? = null
 
     private val PREFS_NAME = "norwin_prefs"
     private val KEY_HOME_TOOLS = "home_tools_ids"
+    private val KEY_BIOMETRIC = "enable_biometric"
+    private val KEY_API_KEY = "gemini_api_key"
 
     private val allTools = listOf(
-        Tool(1, "Calendar", android.R.drawable.ic_menu_today),
-        Tool(2, "Converter", android.R.drawable.ic_menu_compass),
-        Tool(3, "Notes", android.R.drawable.ic_menu_edit),
-        Tool(4, "Settings", android.R.drawable.ic_menu_manage),
-        Tool(5, "About", android.R.drawable.ic_menu_info_details),
-        Tool(9, "Idea Generator", android.R.drawable.ic_menu_send),
-        Tool(10, "Color Picker", android.R.drawable.ic_menu_gallery),
-        Tool(11, "Dice Roller", android.R.drawable.ic_menu_help),
-        Tool(12, "Update", android.R.drawable.ic_menu_upload),
-        Tool(13, "Windhelm", android.R.drawable.ic_menu_view),
-        Tool(14, "Lore Gen", android.R.drawable.ic_menu_sort_alphabetically),
-        Tool(15, "UE5 Guide", android.R.drawable.ic_menu_directions),
-        Tool(16, "Trello", android.R.drawable.ic_menu_agenda),
-        Tool(17, "SSH Client", android.R.drawable.ic_dialog_dialer),
-        Tool(18, "Ping Tool", android.R.drawable.ic_menu_revert),
-        Tool(19, "Pass Gen", android.R.drawable.ic_lock_lock),
-        Tool(20, "Net Scanner", android.R.drawable.ic_menu_share)
+        Tool(1, "Calendar", android.R.drawable.ic_menu_today, "1.0.2", 0xFF2E7D32.toInt(), "https://images.unsplash.com/photo-1506784365847-bbad939e9335?q=80&w=500&auto=format&fit=crop"),
+        Tool(2, "Converter", android.R.drawable.ic_menu_compass, "NR", 0xFF1565C0.toInt(), "https://images.unsplash.com/photo-1574634534894-89d7576c8259?q=80&w=500&auto=format&fit=crop"),
+        Tool(3, "Notes", android.R.drawable.ic_menu_edit, "NR", 0xFFEF6C00.toInt(), "https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=500&auto=format&fit=crop"),
+        Tool(4, "Settings", android.R.drawable.ic_menu_manage, "1.0.1", 0xFF455A64.toInt(), "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=500&auto=format&fit=crop"),
+        Tool(5, "About", android.R.drawable.ic_menu_info_details, "NR", 0xFF4527A0.toInt(), "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=500&auto=format&fit=crop"),
+        Tool(9, "Idea Generator", R.drawable.ic_lightbulb, "1.0.1", 0xFFF9A825.toInt(), "https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=500&auto=format&fit=crop"),
+        Tool(12, "Update", android.R.drawable.ic_menu_upload, "1.0.1", 0xFFC62828.toInt(), "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=500&auto=format&fit=crop"),
+        Tool(13, "Windhelm", android.R.drawable.ic_menu_view, "1.0.2", 0xFF283593.toInt(), "http://windhelmthegame.ddns.net/background.png"),
+        Tool(15, "UE5 Guide", android.R.drawable.ic_menu_directions, "NR", 0xFF00695C.toInt(), "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=500&auto=format&fit=crop"),
+        Tool(16, "Trello", android.R.drawable.ic_menu_agenda, "1.0.1", 0xFF0079BF.toInt(), "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=500&auto=format&fit=crop"),
+        Tool(17, "SSH Client", android.R.drawable.ic_dialog_dialer, "NR", 0xFF37474F.toInt(), "https://images.unsplash.com/photo-1629654297299-c8506221ca97?q=80&w=500&auto=format&fit=crop"),
+        Tool(18, "Ping Tool", android.R.drawable.ic_menu_revert, "NR", 0xFF0091EA.toInt(), "https://images.unsplash.com/photo-1558494949-ef010ca73324?q=80&w=500&auto=format&fit=crop"),
+        Tool(20, "Net Scanner", android.R.drawable.ic_menu_share, "1.0.2", 0xFF546E7A.toInt(), "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=500&auto=format&fit=crop"),
+        Tool(21, "Video Ideas", android.R.drawable.ic_menu_slideshow, "1.0.3", 0xFFE91E63.toInt(), "https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=500&auto=format&fit=crop"),
+        Tool(22, "Dev News", android.R.drawable.ic_menu_recent_history, "1.0.1", 0xFF2E7D32.toInt(), "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=500&auto=format&fit=crop"),
+        Tool(23, "Bug Report", android.R.drawable.ic_menu_report_image, "1.0.0", 0xFFC62828.toInt(), "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=500&auto=format&fit=crop")
     )
 
     private var currentTools = mutableListOf<Tool>()
@@ -91,7 +95,7 @@ class FirstFragment : Fragment() {
                 } else {
                     when(tool.id) {
                         4 -> findNavController().navigate(R.id.action_FirstFragment_to_SettingsFragment)
-                        1 -> { /* Navigate to Calendar if implemented */ }
+                        1 -> findNavController().navigate(R.id.action_FirstFragment_to_CalendarFragment)
                         9 -> showIdeaGenerator()
                         12 -> checkForUpdates()
                         13 -> {
@@ -102,6 +106,10 @@ class FirstFragment : Fragment() {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://trello.com/b/SVY6LFSZ/windhelm-main-development"))
                             startActivity(intent)
                         }
+                        20 -> checkBiometricAndNavigate(R.id.action_FirstFragment_to_NetScannerFragment)
+                        21 -> showVideoIdeaCategoryDialog()
+                        22 -> findNavController().navigate(R.id.action_FirstFragment_to_DevNewsFragment)
+                        23 -> findNavController().navigate(R.id.action_FirstFragment_to_BugReportFragment)
                         else -> {
                              AlertDialog.Builder(requireContext())
                                 .setTitle(tool.name)
@@ -160,46 +168,113 @@ class FirstFragment : Fragment() {
             checkForUpdates()
         }
 
-        setupFooter()
+        setupHeaderAndFooter()
         autoCheckForUpdates()
-        checkIntentAction()
     }
 
     fun filterTools(query: String) {
         adapter.filter(query)
     }
 
-    private fun checkIntentAction() {
-        val intent = activity?.intent
-        val action = intent?.action ?: return
-        
-        when {
-            action == "OPEN_ADD_TOOLS_ACTION" -> showAddToolsBottomSheet()
-            action.startsWith("LAUNCH_TOOL_") -> {
-                val toolId = action.removePrefix("LAUNCH_TOOL_").toIntOrNull()
-                if (toolId != null) {
-                    // Handle quick launch
-                    val tool = allTools.find { it.id == toolId }
-                    if (tool != null) {
-                        // Logic to launch tool
+    private fun checkBiometricAndNavigate(destinationId: Int) {
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val isBiometricEnabled = prefs.getBoolean(KEY_BIOMETRIC, false)
+        val biometricHelper = BiometricHelper(requireActivity())
+
+        if (isBiometricEnabled && biometricHelper.canAuthenticate()) {
+            biometricHelper.showBiometricPrompt(
+                "Restricted Tool",
+                "Authentication Required",
+                "Please authenticate to access this tool.",
+                object : BiometricHelper.BiometricCallback {
+                    override fun onAuthenticationSuccess() {
+                        findNavController().navigate(destinationId)
+                    }
+                    override fun onAuthenticationError(error: String) {
+                        Toast.makeText(requireContext(), "Auth Error: $error", Toast.LENGTH_SHORT).show()
+                    }
+                    override fun onAuthenticationFailed() {
+                        Toast.makeText(requireContext(), "Authentication failed", Toast.LENGTH_SHORT).show()
                     }
                 }
-            }
+            )
+        } else {
+            findNavController().navigate(destinationId)
         }
-        intent.action = null
     }
 
-    override fun onResume() {
-        super.onResume()
-        activity?.findViewById<View>(R.id.fab)?.setOnClickListener {
-            if (adapter.isEditMode) {
-                adapter.isEditMode = false
-                updateToolbar()
-            } else {
-                showAddToolsBottomSheet()
+    private fun showVideoIdeaCategoryDialog() {
+        val categories = arrayOf("Windhelm (Game)", "UE5 / Game Dev")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Select Category")
+            .setItems(categories) { _, which ->
+                val category = if (which == 0) "Windhelm" else "General"
+                showVideoIdeaTypeDialog(category)
             }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showVideoIdeaTypeDialog(category: String) {
+        val options = arrayOf("YouTube Short", "Long-Form Video")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Select Format ($category)")
+            .setItems(options) { _, which ->
+                generateAIVideoIdea(isShort = (which == 0), category = category)
+            }
+            .setNegativeButton("Back") { _, _ -> showVideoIdeaCategoryDialog() }
+            .show()
+    }
+
+    private fun generateAIVideoIdea(isShort: Boolean, category: String) {
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val apiKey = prefs.getString(KEY_API_KEY, "") ?: ""
+        
+        if (apiKey.isEmpty()) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("API Key Required")
+                .setMessage("Please set your Gemini API key in Settings to use AI features.")
+                .setPositiveButton("Go to Settings") { _, _ ->
+                    findNavController().navigate(R.id.action_FirstFragment_to_SettingsFragment)
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+            return
         }
-        checkIntentAction()
+
+        if (aiManager == null) {
+            aiManager = VideoIdeaManager(apiKey)
+        }
+
+        val loadingDialog = AlertDialog.Builder(requireContext())
+            .setTitle("Consulting AI...")
+            .setMessage("Generating a custom idea for $category...")
+            .setCancelable(false)
+            .show()
+
+        lifecycleScope.launch {
+            aiManager?.generateIdea(isShort, category, object : VideoIdeaManager.VideoIdeaCallback {
+                override fun onSuccess(idea: String) {
+                    loadingDialog.dismiss()
+                    activity?.runOnUiThread {
+                        AlertDialog.Builder(requireContext())
+                            .setTitle(if (isShort) "AI Short Idea" else "AI Video Idea")
+                            .setMessage(idea)
+                            .setPositiveButton("Generate Another") { _, _ -> generateAIVideoIdea(isShort, category) }
+                            .setNeutralButton("Change Settings") { _, _ -> showVideoIdeaCategoryDialog() }
+                            .setNegativeButton("Close", null)
+                            .show()
+                    }
+                }
+
+                override fun onError(error: String) {
+                    loadingDialog.dismiss()
+                    activity?.runOnUiThread {
+                        Toast.makeText(requireContext(), "AI Error: $error", Toast.LENGTH_LONG).show()
+                    }
+                }
+            })
+        }
     }
 
     private fun showIdeaGenerator() {
@@ -307,7 +382,7 @@ class FirstFragment : Fragment() {
             adapter.addTool(tool)
             saveHomeTools()
             dialog.dismiss()
-        }, { _, _ -> }, { tool -> })
+        }, { _, _ -> }, {})
         bottomSheetBinding.recyclerviewAvailableTools.layoutManager = GridLayoutManager(context, 3)
         bottomSheetBinding.recyclerviewAvailableTools.adapter = sheetAdapter
         dialog.setContentView(bottomSheetBinding.root)
@@ -327,24 +402,28 @@ class FirstFragment : Fragment() {
             val idList = savedIds.split(",").filter { it.isNotEmpty() }.map { it.toInt() }
             idList.forEach { id -> allTools.find { it.id == id }?.let { currentTools.add(it) } }
         } else {
-            // Default tools
             currentTools.addAll(allTools.take(4))
         }
     }
 
-    private fun setupFooter() {
-        try {
+    private fun setupHeaderAndFooter() {
+        val versionName = try {
             val pInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
-            binding.textviewVersion.text = "Version ${pInfo.versionName}"
+            pInfo.versionName
         } catch (e: Exception) {
-            binding.textviewVersion.text = "Version 1.0"
+            "1.0.0"
         }
+        
+        binding.textviewHeaderVersion.text = "v$versionName"
+        binding.textviewVersion.text = "Version $versionName"
+
         val year = Calendar.getInstance().get(Calendar.YEAR)
         binding.textviewCopyright.text = "© $year NorwinLabs"
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        activity?.findViewById<View>(R.id.fab)?.setOnClickListener(null)
         _binding = null
     }
 }

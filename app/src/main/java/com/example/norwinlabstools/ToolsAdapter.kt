@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.norwinlabstools.databinding.ItemToolBinding
 import java.util.Collections
 
@@ -25,16 +26,32 @@ class ToolsAdapter(
         fun bind(tool: Tool, onToolClick: (Tool) -> Unit, onToolLongClick: (View, Tool) -> Unit, onRemoveClick: (Tool) -> Unit, isEditMode: Boolean) {
             binding.toolName.text = tool.name
             binding.toolIcon.setImageResource(tool.iconRes)
-            binding.root.setOnClickListener { onToolClick(tool) }
-            binding.root.setOnLongClickListener {
-                onToolLongClick(binding.root, tool)
+            binding.toolVersion.text = "v${tool.version}"
+            
+            // Removed custom color overlay as per user request
+            // binding.toolColorOverlay.setBackgroundColor(tool.color)
+            
+            // Load background image if available
+            if (tool.imageUrl != null) {
+                Glide.with(binding.root.context)
+                    .load(tool.imageUrl)
+                    .centerCrop()
+                    .into(binding.toolImageBackground)
+                binding.toolImageBackground.visibility = View.VISIBLE
+                binding.toolColorOverlay.visibility = View.VISIBLE // Keep subtle dark tint for readability
+            } else {
+                binding.toolImageBackground.visibility = View.GONE
+                binding.toolColorOverlay.visibility = View.GONE
+            }
+
+            binding.buttonRemove.visibility = if (isEditMode) View.VISIBLE else View.GONE
+            binding.buttonRemove.setOnClickListener { onRemoveClick(tool) }
+
+            binding.cardTool.setOnClickListener { onToolClick(tool) }
+            binding.cardTool.setOnLongClickListener {
+                onToolLongClick(binding.cardTool, tool)
                 true
             }
-            
-            // Assuming your item_tool.xml might need a remove button for edit mode
-            // If it doesn't exist yet, we can skip or add it
-            // binding.btnRemove.visibility = if (isEditMode) View.VISIBLE else View.GONE
-            // binding.btnRemove.setOnClickListener { onRemoveClick(tool) }
         }
     }
 
