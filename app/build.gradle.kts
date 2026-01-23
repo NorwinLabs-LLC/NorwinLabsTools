@@ -115,18 +115,25 @@ tasks.register("incrementVersion") {
 
 tasks.register("createBuildInfo") {
     group = "build"
-    val releaseDir = rootProject.layout.projectDirectory.dir("releases")
+    val propsFile = rootProject.file("version.properties")
+    val releaseDirFile = rootProject.layout.projectDirectory.dir("releases").asFile
     
     doLast {
-        val releaseDirFile = releaseDir.asFile
+        val props = Properties()
+        if (propsFile.exists()) {
+            propsFile.inputStream().use { props.load(it) }
+        }
+        val vName = props.getProperty("VERSION_NAME", "1.0.0")
+        val vCode = props.getProperty("VERSION_CODE", "1")
+
         if (!releaseDirFile.exists()) releaseDirFile.mkdirs()
         val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
         val infoFile = File(releaseDirFile, "latest-build-info.txt")
         infoFile.writeText("""
             NorwinLabsTools Build Information
-            Version Name: ${getVersionProperty("VERSION_NAME")}
-            Build Number: ${getVersionProperty("VERSION_CODE")}
-            Build Date:   ${timestamp}
+            Version Name: $vName
+            Build Number: $vCode
+            Build Date:   $timestamp
         """.trimIndent())
     }
 }
