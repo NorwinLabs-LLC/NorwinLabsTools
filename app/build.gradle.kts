@@ -39,9 +39,9 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            val keystoreFile = file("debug.keystore")
-            if (keystoreFile.exists()) {
+        val keystoreFile = file("debug.keystore")
+        if (keystoreFile.exists()) {
+            create("release") {
                 storeFile = keystoreFile
                 storePassword = "android"
                 keyAlias = "androiddebugkey"
@@ -54,14 +54,19 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
+            // Only use the "release" config if it was successfully created above
+            if (signingConfigs.findByName("release") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
         debug {
-            signingConfig = signingConfigs.getByName("release")
+            if (signingConfigs.findByName("release") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
@@ -80,7 +85,6 @@ android {
         val variant = this
         variant.outputs.all {
             val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            // Re-adding the timestamp to ensure every build is unique in /releases
             val fileName = "NorwinLabsTools-v${variant.versionName}-b${variant.versionCode}-${variant.name}-$buildTimestamp.apk"
             output.outputFileName = fileName
         }
@@ -150,7 +154,6 @@ tasks.register<Copy>("copyApkToReleases") {
 
 tasks.configureEach {
     if (name.startsWith("assemble")) {
-        // Task dependency fix: increment version before starting assembly
         dependsOn("incrementVersion")
         finalizedBy("createBuildInfo")
         finalizedBy("copyApkToReleases")
