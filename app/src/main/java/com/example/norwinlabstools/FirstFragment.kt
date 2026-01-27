@@ -160,16 +160,6 @@ class FirstFragment : Fragment() {
 
         setupDragAndDrop()
 
-        val fab = activity?.findViewById<View>(R.id.fab)
-        fab?.setOnClickListener {
-            if (adapter.isEditMode) {
-                adapter.isEditMode = false
-                updateToolbar()
-            } else {
-                showAddToolsBottomSheet()
-            }
-        }
-
         binding.layoutContainer.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN && adapter.isEditMode) {
                 adapter.isEditMode = false
@@ -192,6 +182,20 @@ class FirstFragment : Fragment() {
 
         setupHeaderAndFooter()
         autoCheckForUpdates()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Ensure FAB listener is re-attached after returning from other fragments
+        val fab = activity?.findViewById<View>(R.id.fab)
+        fab?.setOnClickListener {
+            if (adapter.isEditMode) {
+                adapter.isEditMode = false
+                updateToolbar()
+            } else {
+                showAddToolsBottomSheet()
+            }
+        }
     }
 
     fun filterTools(query: String) {
@@ -441,7 +445,6 @@ class FirstFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        activity?.findViewById<View>(R.id.fab)?.setOnClickListener(null)
         _binding = null
     }
 }
