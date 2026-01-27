@@ -57,10 +57,10 @@ android {
     }
 
     signingConfigs {
-        // Use debug.keystore for everything to ensure cross-PC/GitHub patching works
-        val keystoreFile = file("debug.keystore")
+        // Use the actual .jks file found in your project for consistent cross-PC/GitHub patching
+        val keystoreFile = file("debug.keystore.jks")
         if (keystoreFile.exists()) {
-            create("release") {
+            create("sharedConfig") {
                 storeFile = keystoreFile
                 storePassword = "android"
                 keyAlias = "androiddebugkey"
@@ -73,14 +73,14 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.findByName("release")
+            signingConfig = signingConfigs.findByName("sharedConfig")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
         debug {
-            signingConfig = signingConfigs.findByName("release")
+            signingConfig = signingConfigs.findByName("sharedConfig")
         }
     }
 
