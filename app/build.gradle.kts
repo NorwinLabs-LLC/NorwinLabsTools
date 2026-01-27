@@ -10,18 +10,36 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
-// Helper to read version properties safely
-fun getVersionProperty(key: String): String {
-    val props = Properties()
-    val propsFile = rootProject.file("version.properties")
-    if (propsFile.exists()) {
-        propsFile.inputStream().use { props.load(it) }
-    }
-    return props.getProperty(key, if (key == "VERSION_CODE") "1" else "1.0.0")
+// 1. Versioning Logic: Increments the version for the CURRENT build
+val versionPropsFile = rootProject.file("version.properties")
+val versionProps = Properties()
+if (versionPropsFile.exists()) {
+    versionPropsFile.inputStream().use { versionProps.load(it) }
 }
 
-val verCode = getVersionProperty("VERSION_CODE").toInt()
-val verName = getVersionProperty("VERSION_NAME")
+var verCode = versionProps.getProperty("VERSION_CODE", "1").toInt()
+var verName = versionProps.getProperty("VERSION_NAME", "1.0.0")
+
+// Detect if we are running a build task
+val isBuilding = gradle.startParameter.taskNames.any { 
+    it.contains("assemble") || it.contains("install") || it.contains("bundle") 
+}
+
+if (isBuilding) {
+    verCode++
+    val parts = verName.split(".").toMutableList()
+    if (parts.isNotEmpty()) {
+        val lastPart = parts.last().toIntOrNull() ?: 0
+        parts[parts.size - 1] = (lastPart + 1).toString()
+        verName = parts.joinToString(".")
+    }
+    
+    // Save immediately so the APK and the file are in sync
+    versionProps.setProperty("VERSION_CODE", verCode.toString())
+    versionProps.setProperty("VERSION_NAME", verName)
+    versionPropsFile.outputStream().use { versionProps.store(it, "Auto-incremented build version") }
+}
+
 val buildTimestamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(Date())
 
 android {
@@ -39,6 +57,7 @@ android {
     }
 
     signingConfigs {
+        // Use debug.keystore for everything to ensure cross-PC/GitHub patching works
         val keystoreFile = file("debug.keystore")
         if (keystoreFile.exists()) {
             create("release") {
@@ -54,19 +73,14 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            // Only use the "release" config if it was successfully created above
-            if (signingConfigs.findByName("release") != null) {
-                signingConfig = signingConfigs.getByName("release")
-            }
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
         debug {
-            if (signingConfigs.findByName("release") != null) {
-                signingConfig = signingConfigs.getByName("release")
-            }
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
@@ -85,41 +99,16 @@ android {
         val variant = this
         variant.outputs.all {
             val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            val fileName = "NorwinLabsTools-v${variant.versionName}-b${variant.versionCode}-${variant.name}-$buildTimestamp.apk"
+            val fileName = "NorwinLabsTools-v${variant.versionName}-b${variant.versionCode}-${variant.name}.apk"
             output.outputFileName = fileName
         }
     }
 }
 
-tasks.register("incrementVersion") {
-    group = "versioning"
-    val propsFile = rootProject.file("version.properties")
-    
-    doLast {
-        val props = Properties()
-        if (propsFile.exists()) {
-            propsFile.inputStream().use { props.load(it) }
-        }
-        val currentCode = props.getProperty("VERSION_CODE", "1").toInt()
-        val nextCode = currentCode + 1
-        props.setProperty("VERSION_CODE", nextCode.toString())
-        
-        val currentName = props.getProperty("VERSION_NAME", "1.0.0")
-        val parts = currentName.split(".").toMutableList()
-        if (parts.isNotEmpty()) {
-            val lastPart = parts.last().toIntOrNull() ?: 0
-            parts[parts.size - 1] = (lastPart + 1).toString()
-            val nextName = parts.joinToString(".")
-            props.setProperty("VERSION_NAME", nextName)
-        }
-        propsFile.outputStream().use { props.store(it, "Auto-incremented build version") }
-        println("Version Incremented to: $nextCode")
-    }
-}
-
+// Configuration Cache safe tasks
 tasks.register("createBuildInfo") {
     group = "build"
-    val propsFile = rootProject.file("version.properties")
+    val propsFile = versionPropsFile
     val releaseDirFile = rootProject.layout.projectDirectory.dir("releases").asFile
     
     doLast {
@@ -154,7 +143,6 @@ tasks.register<Copy>("copyApkToReleases") {
 
 tasks.configureEach {
     if (name.startsWith("assemble")) {
-        dependsOn("incrementVersion")
         finalizedBy("createBuildInfo")
         finalizedBy("copyApkToReleases")
     }
