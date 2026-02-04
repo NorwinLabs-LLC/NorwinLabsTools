@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.norwinlabstools.databinding.FragmentBudgetBinding
 import com.example.norwinlabstools.databinding.ItemBudgetCategoryBinding
-import com.google.android.material.textfield.TextInputLayout
+import java.util.Locale
 
 class BudgetFragment : Fragment() {
 
@@ -67,12 +67,12 @@ class BudgetFragment : Fragment() {
         categories.forEach { totalAllocated += it.amount }
         
         val extra = monthlyIncome - totalAllocated
-        binding.tvExtra_to_invest.text = "Extra to Invest: $${String.format("%.2f", if (extra > 0) extra else 0.0)}"
+        binding.tvExtraToInvest.text = String.format(Locale.US, "Extra to Invest: $%.2f", if (extra > 0) extra else 0.0)
         
         if (extra < 0) {
-            binding.tvExtra_to_invest.setTextColor(0xFFFF5252.toInt()) // Red for over-budget
+            binding.tvExtraToInvest.setTextColor(0xFFFF5252.toInt()) // Red for over-budget
         } else {
-            binding.tvExtra_to_invest.setTextColor(0xFF4CAF50.toInt()) // Green for healthy budget
+            binding.tvExtraToInvest.setTextColor(0xFF4CAF50.toInt()) // Green for healthy budget
         }
 
         binding.pieChart.setData(monthlyIncome, categories)
@@ -122,7 +122,7 @@ class BudgetFragment : Fragment() {
             
             // Remove text watcher before setting text to avoid infinite loop
             holder.binding.editAmount.removeTextChangedListener(holder.binding.editAmount.tag as? TextWatcher)
-            holder.binding.editAmount.setText(if (item.amount > 0) item.amount.toString() else "")
+            holder.binding.editAmount.setText(if (item.amount > 0) String.format(Locale.US, "%.2f", item.amount) else "")
             
             val watcher = object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
