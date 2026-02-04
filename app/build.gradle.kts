@@ -57,13 +57,14 @@ android {
     }
 
     signingConfigs {
-        // Use the actual .jks file found in your project for consistent cross-PC/GitHub patching
-        val keystoreFile = file("debug.keystore.jks")
+        // Updated to use the new norwin.keystore.jks for consistent cross-PC/GitHub patching
+        val keystoreFile = file("norwin.keystore.jks")
         if (keystoreFile.exists()) {
             create("sharedConfig") {
                 storeFile = keystoreFile
-                storePassword = "android"
-                keyAlias = "androiddebugkey"
+                // IMPORTANT: Replace these with the actual credentials you set during generation
+                storePassword = "andriod"
+                keyAlias = "norwin-key"
                 keyPassword = "android"
             }
         }
