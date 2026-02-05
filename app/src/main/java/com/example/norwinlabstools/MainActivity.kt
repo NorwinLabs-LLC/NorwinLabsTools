@@ -1,16 +1,18 @@
 package com.example.norwinlabstools
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
-import androidx.appcompat.widget.SearchView
 import com.example.norwinlabstools.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -29,6 +31,17 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.FirstFragment) {
+                binding.fab.show()
+                binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
+            } else {
+                binding.fab.hide()
+                // You can set a solid color for applets if desired, e.g.:
+                // binding.toolbar.setBackgroundColor(getColor(R.color.colorPrimary))
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -45,7 +58,6 @@ class MainActivity : AppCompatActivity() {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean = false
             override fun onQueryTextChange(newText: String?): Boolean {
-                // Communicate search to FirstFragment
                 val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
                 val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
                 if (currentFragment is FirstFragment) {

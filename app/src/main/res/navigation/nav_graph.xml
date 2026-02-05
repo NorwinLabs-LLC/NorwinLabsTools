@@ -35,6 +35,12 @@
         <action
             android:id="@+id/action_FirstFragment_to_BudgetFragment"
             app:destination="@id/BudgetFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_SystemDashboardFragment"
+            app:destination="@id/SystemDashboardFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_PortScannerFragment"
+            app:destination="@id/PortScannerFragment" />
     </fragment>
     
     <fragment
@@ -88,5 +94,17 @@
         android:name="com.example.norwinlabstools.BudgetFragment"
         android:label="Budget"
         tools:layout="@layout/fragment_budget" />
+
+    <fragment
+        android:id="@+id/SystemDashboardFragment"
+        android:name="com.example.norwinlabstools.SystemDashboardFragment"
+        android:label="System Dashboard"
+        tools:layout="@layout/fragment_system_dashboard" />
+
+    <fragment
+        android:id="@+id/PortScannerFragment"
+        android:name="com.example.norwinlabstools.PortScannerFragment"
+        android:label="Port Scanner"
+        tools:layout="@layout/fragment_port_scanner" />
 
 </navigation>
