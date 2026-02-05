@@ -98,29 +98,7 @@ class FirstFragment : Fragment() {
                         4 -> findNavController().navigate(R.id.action_FirstFragment_to_SettingsFragment)
                         1 -> findNavController().navigate(R.id.action_FirstFragment_to_CalendarFragment)
                         9 -> showIdeaGenerator()
-                        12 -> {
-                            val updateManager = UpdateManager(requireContext())
-                            updateManager.checkForUpdates(object : UpdateManager.UpdateCallback {
-                                override fun onUpdateAvailable(latestVersion: String, downloadUrl: String) {
-                                    activity?.runOnUiThread {
-                                        AlertDialog.Builder(requireContext())
-                                            .setTitle("Update Available")
-                                            .setMessage("A new version ($latestVersion) is available. Download now?")
-                                            .setPositiveButton("Download") { _, _ ->
-                                                updateManager.downloadAndInstallApk(downloadUrl, "NorwinLabsTools-Update.apk")
-                                            }
-                                            .setNegativeButton("Later", null)
-                                            .show()
-                                    }
-                                }
-                                override fun onNoUpdate() {
-                                    activity?.runOnUiThread { Toast.makeText(requireContext(), "You are on the latest version", Toast.LENGTH_SHORT).show() }
-                                }
-                                override fun onError(error: String, url: String) {
-                                    activity?.runOnUiThread { Toast.makeText(requireContext(), "Update check failed: $error", Toast.LENGTH_LONG).show() }
-                                }
-                            })
-                        }
+                        12 -> checkForUpdates()
                         13 -> {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://windhelmthegame.ddns.net"))
                             startActivity(intent)
@@ -183,7 +161,6 @@ class FirstFragment : Fragment() {
         }
 
         setupHeaderAndFooter()
-        autoCheckForUpdates()
     }
 
     override fun onResume() {
@@ -331,30 +308,17 @@ class FirstFragment : Fragment() {
         }
     }
 
-    private fun autoCheckForUpdates() {
+    private fun checkForUpdates() {
         val updateManager = UpdateManager(requireContext())
+        binding.textviewUpdateStatus.text = "Checking..."
+        Toast.makeText(requireContext(), "Checking for updates...", Toast.LENGTH_SHORT).show()
+        
         updateManager.checkForUpdates(object : UpdateManager.UpdateCallback {
             override fun onUpdateAvailable(latestVersion: String, downloadUrl: String) {
                 activity?.runOnUiThread {
                     binding.textviewUpdateStatus.text = "New version: $latestVersion"
                     binding.textviewUpdateStatus.setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
-                }
-            }
-            override fun onNoUpdate() {
-                activity?.runOnUiThread { binding.textviewUpdateStatus.text = "Up to date" }
-            }
-            override fun onError(error: String, url: String) {
-                activity?.runOnUiThread { binding.textviewUpdateStatus.text = "Check failed" }
-            }
-        })
-    }
-
-    private fun checkForUpdates() {
-        val updateManager = UpdateManager(requireContext())
-        Toast.makeText(requireContext(), "Checking for updates...", Toast.LENGTH_SHORT).show()
-        updateManager.checkForUpdates(object : UpdateManager.UpdateCallback {
-            override fun onUpdateAvailable(latestVersion: String, downloadUrl: String) {
-                activity?.runOnUiThread {
+                    
                     AlertDialog.Builder(requireContext())
                         .setTitle("Update Available")
                         .setMessage("A new version ($latestVersion) is available. Would you like to download it?")
@@ -366,10 +330,15 @@ class FirstFragment : Fragment() {
                 }
             }
             override fun onNoUpdate() {
-                activity?.runOnUiThread { Toast.makeText(requireContext(), "You are on the latest version", Toast.LENGTH_SHORT).show() }
+                activity?.runOnUiThread { 
+                    binding.textviewUpdateStatus.text = "Up to date"
+                    binding.textviewUpdateStatus.setTextColor(resources.getColor(android.R.color.darker_gray, null))
+                    Toast.makeText(requireContext(), "You are on the latest version", Toast.LENGTH_SHORT).show() 
+                }
             }
             override fun onError(error: String, url: String) {
                 activity?.runOnUiThread {
+                    binding.textviewUpdateStatus.text = "Check failed"
                     AlertDialog.Builder(requireContext())
                         .setTitle("Update Failed")
                         .setMessage("$error\n\nChecked URL:\n$url")
