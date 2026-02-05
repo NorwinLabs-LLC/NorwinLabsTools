@@ -32,6 +32,9 @@
         <action
             android:id="@+id/action_FirstFragment_to_BugReportFragment"
             app:destination="@id/BugReportFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_BudgetFragment"
+            app:destination="@id/BudgetFragment" />
     </fragment>
     
     <fragment
@@ -79,5 +82,11 @@
         android:name="com.example.norwinlabstools.BugReportFragment"
         android:label="Report a Bug"
         tools:layout="@layout/fragment_bug_report" />
+
+    <fragment
+        android:id="@+id/BudgetFragment"
+        android:name="com.example.norwinlabstools.BudgetFragment"
+        android:label="Budget"
+        tools:layout="@layout/fragment_budget" />
 
 </navigation>

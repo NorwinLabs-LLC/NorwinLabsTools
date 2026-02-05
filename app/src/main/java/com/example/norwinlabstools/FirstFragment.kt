@@ -53,7 +53,8 @@ class FirstFragment : Fragment() {
         Tool(20, "Net Scanner", android.R.drawable.ic_menu_share, "1.0.2", 0xFF546E7A.toInt(), "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=500&auto=format&fit=crop"),
         Tool(21, "Video Ideas", android.R.drawable.ic_menu_slideshow, "1.0.3", 0xFFE91E63.toInt(), "https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=500&auto=format&fit=crop"),
         Tool(22, "Dev News", android.R.drawable.ic_menu_recent_history, "1.0.1", 0xFF2E7D32.toInt(), "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=500&auto=format&fit=crop"),
-        Tool(23, "Bug Report", android.R.drawable.ic_menu_report_image, "1.0.0", 0xFFC62828.toInt(), "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=500&auto=format&fit=crop")
+        Tool(23, "Bug Report", android.R.drawable.ic_menu_report_image, "1.0.0", 0xFFC62828.toInt(), "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=500&auto=format&fit=crop"),
+        Tool(24, "Budget", android.R.drawable.ic_menu_save, "1.0.0", 0xFF4CAF50.toInt(), "https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=500&auto=format&fit=crop")
     )
 
     private var currentTools = mutableListOf<Tool>()
@@ -132,6 +133,7 @@ class FirstFragment : Fragment() {
                         21 -> showVideoIdeaCategoryDialog()
                         22 -> findNavController().navigate(R.id.action_FirstFragment_to_DevNewsFragment)
                         23 -> findNavController().navigate(R.id.action_FirstFragment_to_BugReportFragment)
+                        24 -> findNavController().navigate(R.id.action_FirstFragment_to_BudgetFragment)
                         else -> {
                              AlertDialog.Builder(requireContext())
                                 .setTitle(tool.name)
@@ -186,7 +188,7 @@ class FirstFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Ensure FAB listener is re-attached after returning from other fragments
+        // Force re-attach the FAB listener every time we return to the home screen
         val fab = activity?.findViewById<View>(R.id.fab)
         fab?.setOnClickListener {
             if (adapter.isEditMode) {
