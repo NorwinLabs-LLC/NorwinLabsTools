@@ -63,7 +63,7 @@ android {
             create("sharedConfig") {
                 storeFile = keystoreFile
                 // IMPORTANT: Replace these with the actual credentials you set during generation
-                storePassword = "andriod"
+                storePassword = "android"
                 keyAlias = "norwin-key"
                 keyPassword = "android"
             }
