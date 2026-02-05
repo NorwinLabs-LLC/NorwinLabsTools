@@ -1,5 +1,6 @@
 package com.example.norwinlabstools
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -14,6 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.norwinlabstools.databinding.FragmentBudgetBinding
 import com.example.norwinlabstools.databinding.ItemBudgetCategoryBinding
+import org.json.JSONArray
+import org.json.JSONObject
 import java.util.Locale
 
 class BudgetFragment : Fragment() {
@@ -41,6 +44,8 @@ class BudgetFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        loadData()
 
         allocationAdapter = AllocationAdapter(categories) { updateCalculations() }
         binding.rvAllocations.layoutManager = LinearLayoutManager(context)
@@ -76,6 +81,44 @@ class BudgetFragment : Fragment() {
         }
 
         binding.pieChart.setData(monthlyIncome, categories)
+        saveData()
+    }
+
+    private fun saveData() {
+        val prefs = requireContext().getSharedPreferences("BudgetPrefs", Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        editor.putFloat("monthly_income", monthlyIncome.toFloat())
+        
+        val jsonArray = JSONArray()
+        categories.forEach { category ->
+            val jsonObject = JSONObject()
+            jsonObject.put("name", category.name)
+            jsonObject.put("amount", category.amount)
+            jsonObject.put("color", category.color)
+            jsonArray.put(jsonObject)
+        }
+        editor.putString("categories_json", jsonArray.toString())
+        editor.apply()
+    }
+
+    private fun loadData() {
+        val prefs = requireContext().getSharedPreferences("BudgetPrefs", Context.MODE_PRIVATE)
+        monthlyIncome = prefs.getFloat("monthly_income", 0.0f).toDouble()
+        binding.editIncome.setText(if (monthlyIncome > 0) String.format(Locale.US, "%.2f", monthlyIncome) else "")
+        
+        val jsonString = prefs.getString("categories_json", null)
+        if (jsonString != null) {
+            categories.clear()
+            val jsonArray = JSONArray(jsonString)
+            for (i in 0 until jsonArray.length()) {
+                val jsonObject = jsonArray.getJSONObject(i)
+                categories.add(BudgetCategory(
+                    jsonObject.getString("name"),
+                    jsonObject.getDouble("amount"),
+                    jsonObject.getInt("color")
+                ))
+            }
+        }
     }
 
     private fun showAddCategoryDialog() {
