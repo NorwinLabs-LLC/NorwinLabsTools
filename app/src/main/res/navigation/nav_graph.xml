@@ -3,54 +3,54 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/HomeFragment">
 
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="com.example.norwinlabstools.FirstFragment"
+        android:id="@+id/HomeFragment"
+        android:name="com.example.norwinlabstools.HomeFragment"
         android:label=""
-        tools:layout="@layout/fragment_first">
+        tools:layout="@layout/fragment_home">
 
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
+            android:id="@+id/action_HomeFragment_to_WebViewFragment"
+            app:destination="@id/WebViewFragment" />
         <action
-            android:id="@+id/action_FirstFragment_to_SettingsFragment"
+            android:id="@+id/action_HomeFragment_to_SettingsFragment"
             app:destination="@id/SettingsFragment" />
         <action
-            android:id="@+id/action_FirstFragment_to_HapticTesterFragment"
+            android:id="@+id/action_HomeFragment_to_HapticTesterFragment"
             app:destination="@id/HapticTesterFragment" />
         <action
-            android:id="@+id/action_FirstFragment_to_CalendarFragment"
+            android:id="@+id/action_HomeFragment_to_CalendarFragment"
             app:destination="@id/CalendarFragment" />
         <action
-            android:id="@+id/action_FirstFragment_to_NetScannerFragment"
+            android:id="@+id/action_HomeFragment_to_NetScannerFragment"
             app:destination="@id/NetScannerFragment" />
         <action
-            android:id="@+id/action_FirstFragment_to_DevNewsFragment"
+            android:id="@+id/action_HomeFragment_to_DevNewsFragment"
             app:destination="@id/DevNewsFragment" />
         <action
-            android:id="@+id/action_FirstFragment_to_BugReportFragment"
+            android:id="@+id/action_HomeFragment_to_BugReportFragment"
             app:destination="@id/BugReportFragment" />
         <action
-            android:id="@+id/action_FirstFragment_to_BudgetFragment"
+            android:id="@+id/action_HomeFragment_to_BudgetFragment"
             app:destination="@id/BudgetFragment" />
         <action
-            android:id="@+id/action_FirstFragment_to_SystemDashboardFragment"
+            android:id="@+id/action_HomeFragment_to_SystemDashboardFragment"
             app:destination="@id/SystemDashboardFragment" />
         <action
-            android:id="@+id/action_FirstFragment_to_PortScannerFragment"
+            android:id="@+id/action_HomeFragment_to_PortScannerFragment"
             app:destination="@id/PortScannerFragment" />
     </fragment>
     
     <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.example.norwinlabstools.SecondFragment"
+        android:id="@+id/WebViewFragment"
+        android:name="com.example.norwinlabstools.WebViewFragment"
         android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
+        tools:layout="@layout/fragment_webview">
         <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
+            android:id="@+id/action_WebViewFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
     </fragment>
 
     <fragment
