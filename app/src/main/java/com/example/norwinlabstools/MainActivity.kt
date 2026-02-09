@@ -33,13 +33,11 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.FirstFragment) {
+            if (destination.id == R.id.HomeFragment) {
                 binding.fab.show()
                 binding.toolbar.setBackgroundColor(Color.TRANSPARENT)
             } else {
                 binding.fab.hide()
-                // You can set a solid color for applets if desired, e.g.:
-                // binding.toolbar.setBackgroundColor(getColor(R.color.colorPrimary))
             }
         }
     }
@@ -60,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             override fun onQueryTextChange(newText: String?): Boolean {
                 val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
                 val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
-                if (currentFragment is FirstFragment) {
+                if (currentFragment is HomeFragment) {
                     currentFragment.filterTools(newText ?: "")
                 }
                 return true
@@ -73,7 +71,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_settings -> {
-                findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.action_FirstFragment_to_SettingsFragment)
+                findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.action_HomeFragment_to_SettingsFragment)
                 true
             }
             R.id.action_windhelm -> {
