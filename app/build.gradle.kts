@@ -66,6 +66,12 @@ android {
                 storePassword = "android"
                 keyAlias = "norwin-key"
                 keyPassword = "android"
+                
+                // Enable modern signing schemes to avoid Google Play Protect warnings
+                enableV1Signing = true  // Legacy JAR signing for older devices
+                enableV2Signing = true  // APK Signature Scheme v2 (Android 7.0+)
+                enableV3Signing = true  // APK Signature Scheme v3 (Android 9.0+)
+                enableV4Signing = true  // APK Signature Scheme v4 (Android 11+)
             }
         }
     }
