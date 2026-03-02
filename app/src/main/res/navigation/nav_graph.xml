@@ -41,6 +41,9 @@
         <action
             android:id="@+id/action_HomeFragment_to_PortScannerFragment"
             app:destination="@id/PortScannerFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_CircleShareFragment"
+            app:destination="@id/CircleShareFragment" />
     </fragment>
     
     <fragment
@@ -106,5 +109,11 @@
         android:name="com.example.norwinlabstools.PortScannerFragment"
         android:label="Port Scanner"
         tools:layout="@layout/fragment_port_scanner" />
+
+    <fragment
+        android:id="@+id/CircleShareFragment"
+        android:name="com.example.norwinlabstools.CircleShareFragment"
+        android:label="Circle Share"
+        tools:layout="@layout/fragment_location_sharing" />
 
 </navigation>

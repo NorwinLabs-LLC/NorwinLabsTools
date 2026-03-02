@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
+import java.util.UUID
 
 class BudgetPieChartView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -29,7 +30,6 @@ class BudgetPieChartView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (totalIncome <= 0) {
-            // Draw empty gray circle
             paint.color = 0xFFEEEEEE.toInt()
             canvas.drawCircle(width / 2f, height / 2f, Math.min(width, height) / 2f, paint)
             return
@@ -49,11 +49,10 @@ class BudgetPieChartView @JvmOverloads constructor(
             totalAllocated += category.amount
         }
 
-        // Draw extra/investment slice
         val extra = totalIncome - totalAllocated
         if (extra > 0) {
             val sweepAngle = (extra / totalIncome * 360).toFloat()
-            paint.color = 0xFF4CAF50.toInt() // Primary Green for investment
+            paint.color = 0xFF4CAF50.toInt()
             canvas.drawArc(rectF, startAngle, sweepAngle, true, paint)
         }
     }
@@ -62,5 +61,21 @@ class BudgetPieChartView @JvmOverloads constructor(
 data class BudgetCategory(
     val name: String,
     val amount: Double,
+    val color: Int
+)
+
+data class BudgetTransaction(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String,
+    val amount: Double,
+    val categoryName: String,
+    val date: Long = System.currentTimeMillis()
+)
+
+data class SavingsGoal(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String,
+    val targetAmount: Double,
+    val currentAmount: Double,
     val color: Int
 )

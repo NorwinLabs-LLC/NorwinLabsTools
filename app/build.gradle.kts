@@ -8,6 +8,7 @@ import java.util.Locale
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.gms.google-services")
 }
 
 // 1. Versioning Logic: Increments the version for the CURRENT build
@@ -166,6 +167,16 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.generativeai)
     implementation(libs.androidx.biometric)
+    
+    // OpenStreetMap
+    implementation(libs.osmdroid)
+    
+    // Firebase
+    implementation(libs.firebase.database)
+
+    // Image Cropping
+    implementation(libs.ucrop)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

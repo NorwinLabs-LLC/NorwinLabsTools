@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/budget_overview"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="Overview" />
+    <item
+        android:id="@+id/budget_transactions"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Transactions" />
+    <item
+        android:id="@+id/budget_goals"
+        android:icon="@android:drawable/ic_menu_upload"
+        android:title="Goals" />
+</menu>

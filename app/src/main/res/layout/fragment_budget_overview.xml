@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F9FA">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Net Worth"
+            android:textAppearance="?attr/textAppearanceSubtitle2"
+            android:alpha="0.6" />
+
+        <TextView
+            android:id="@+id/tv_net_worth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="$12,450.00"
+            android:textAppearance="?attr/textAppearanceHeadline4"
+            android:textStyle="bold"
+            android:textColor="#212121" />
+
+        <!-- Spending vs Income Chart Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E0E0E0">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Monthly Spending"
+                    android:textStyle="bold"
+                    android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+                <com.example.norwinlabstools.BudgetPieChartView
+                    android:id="@+id/overview_pie_chart"
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
+                    android:layout_gravity="center"
+                    android:layout_margin="20dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Income" android:textSize="12sp" android:alpha="0.6"/>
+                        <TextView android:id="@+id/tv_income_val" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="$5,000" android:textStyle="bold" android:textColor="#4CAF50"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Spent" android:textSize="12sp" android:alpha="0.6"/>
+                        <TextView android:id="@+id/tv_spent_val" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="$3,200" android:textStyle="bold" android:textColor="#F44336"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Subscriptions / Recurring Card -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upcoming Bills"
+            android:layout_marginTop="24dp"
+            android:textStyle="bold"
+            android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E0E0E0">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_upcoming_bills"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:nestedScrollingEnabled="false" />
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
