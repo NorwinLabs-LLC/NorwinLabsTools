@@ -5,15 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.Rect
+import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.location.LocationListener
@@ -45,6 +37,7 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.TilesOverlay
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
@@ -63,6 +56,10 @@ class CircleShareFragment : Fragment() {
     private var isAdmin: Boolean = false
     private var myName: String = "User"
     private var myPhotoBase64: String? = null
+    private var isMapCentered = false
+    
+    private var isSatellite = false
+    private var isDarkMode = false
 
     private val PREFS_NAME = "circle_prefs"
     private val KEY_CIRCLE_ID = "current_circle_id"
@@ -96,6 +93,11 @@ class CircleShareFragment : Fragment() {
         override fun onLocationChanged(location: Location) {
             val myPoint = GeoPoint(location.latitude, location.longitude)
             updateMarker("me", myPoint, isMe = true, name = myName, photoBase64 = myPhotoBase64)
+
+            if (!isMapCentered) {
+                binding.mapView.controller.setCenter(myPoint)
+                isMapCentered = true
+            }
 
             currentCircleId?.let { circleId ->
                 database?.child("circles")?.child(circleId)?.child("members")?.child(userId)?.apply {
@@ -165,15 +167,80 @@ class CircleShareFragment : Fragment() {
         }
 
         binding.fabCenterOnMe.setOnClickListener {
-            locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let {
-                binding.mapView.controller.animateTo(GeoPoint(it.latitude, it.longitude))
-            } ?: Toast.makeText(context, "Finding location...", Toast.LENGTH_SHORT).show()
+            centerOnLastKnownLocation()
+        }
+
+        binding.fabToggleSatellite.setOnClickListener {
+            toggleSatellite()
+        }
+
+        binding.fabToggleDarkMode.setOnClickListener {
+            toggleDarkMode()
         }
 
         checkLocationPermissions()
         startLocationUpdates()
+        centerOnLastKnownLocation()
         
         currentCircleId?.let { joinCircle(it, isAutoJoin = true) }
+    }
+
+    private fun toggleSatellite() {
+        isSatellite = !isSatellite
+        if (isSatellite) {
+            binding.mapView.setTileSource(TileSourceFactory.USGS_SAT)
+            binding.fabToggleSatellite.setImageResource(android.R.drawable.ic_menu_mapmode)
+        } else {
+            binding.mapView.setTileSource(TileSourceFactory.MAPNIK)
+            binding.fabToggleSatellite.setImageResource(android.R.drawable.ic_menu_mapmode)
+        }
+        updateMapTheme()
+    }
+
+    private fun toggleDarkMode() {
+        isDarkMode = !isDarkMode
+        if (isDarkMode) {
+            binding.fabToggleDarkMode.setImageResource(android.R.drawable.ic_menu_day)
+        } else {
+            binding.fabToggleDarkMode.setImageResource(android.R.drawable.ic_menu_recent_history)
+        }
+        updateMapTheme()
+    }
+
+    private fun updateMapTheme() {
+        if (isDarkMode) {
+            val matrix = ColorMatrix(floatArrayOf(
+                -1.0f, 0.0f, 0.0f, 0.0f, 255.0f,
+                0.0f, -1.0f, 0.0f, 0.0f, 255.0f,
+                0.0f, 0.0f, -1.0f, 0.0f, 255.0f,
+                0.0f, 0.0f, 0.0f, 1.0f, 0.0f
+            ))
+            binding.mapView.overlayManager.tilesOverlay.setColorFilter(ColorMatrixColorFilter(matrix))
+        } else {
+            binding.mapView.overlayManager.tilesOverlay.setColorFilter(null)
+        }
+        binding.mapView.invalidate()
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun centerOnLastKnownLocation() {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val providers = locationManager.getProviders(true)
+            var bestLocation: Location? = null
+            for (provider in providers) {
+                val l = locationManager.getLastKnownLocation(provider) ?: continue
+                if (bestLocation == null || l.accuracy < bestLocation.accuracy) {
+                    bestLocation = l
+                }
+            }
+            if (bestLocation != null) {
+                val point = GeoPoint(bestLocation.latitude, bestLocation.longitude)
+                binding.mapView.controller.animateTo(point)
+                isMapCentered = true
+            } else if (!isMapCentered) {
+                Toast.makeText(context, "Finding location...", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun startCrop(uri: Uri) {
