@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "886546152569",
+    "project_id": "norwinlabstoolsmaps",
+    "storage_bucket": "norwinlabstoolsmaps.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:886546152569:android:1972405bb22a52745228a8",
+        "android_client_info": {
+          "package_name": "com.example.norwinlabstools"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7-gHcScSYgreVGXyjcgcEmBxOXT5DAgA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
