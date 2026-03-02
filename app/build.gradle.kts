@@ -11,7 +11,7 @@ plugins {
     id("com.google.gms.google-services")
 }
 
-// 1. Versioning Logic: Increments the version for the CURRENT build
+// 1. Versioning Logic: Increments the version for RELEASE builds
 val versionPropsFile = rootProject.file("version.properties")
 val versionProps = Properties()
 if (versionPropsFile.exists()) {
@@ -21,12 +21,12 @@ if (versionPropsFile.exists()) {
 var verCode = versionProps.getProperty("VERSION_CODE", "1").toInt()
 var verName = versionProps.getProperty("VERSION_NAME", "1.0.0")
 
-// Detect if we are running a build task
-val isBuilding = gradle.startParameter.taskNames.any { 
-    it.contains("assemble") || it.contains("install") || it.contains("bundle") 
+// Detect if we are running a release build task (prevents incrementing on debug runs)
+val isBuildingRelease = gradle.startParameter.taskNames.any { 
+    (it.contains("assembleRelease") || it.contains("bundleRelease")) && !it.contains("Debug")
 }
 
-if (isBuilding) {
+if (isBuildingRelease) {
     verCode++
     val parts = verName.split(".").toMutableList()
     if (parts.isNotEmpty()) {
@@ -38,7 +38,7 @@ if (isBuilding) {
     // Save immediately so the APK and the file are in sync
     versionProps.setProperty("VERSION_CODE", verCode.toString())
     versionProps.setProperty("VERSION_NAME", verName)
-    versionPropsFile.outputStream().use { versionProps.store(it, "Auto-incremented build version") }
+    versionPropsFile.outputStream().use { versionProps.store(it, "Auto-incremented build version for Release") }
 }
 
 val buildTimestamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(Date())
@@ -132,9 +132,9 @@ tasks.register("createBuildInfo") {
         val infoFile = File(releaseDirFile, "latest-build-info.txt")
         infoFile.writeText("""
             NorwinLabsTools Build Information
-            Version Name: $vName
-            Build Number: $vCode
-            Build Date:   $timestamp
+            Version Name: ${"$"}vName
+            Build Number: ${"$"}vCode
+            Build Date:   ${"$"}timestamp
         """.trimIndent())
     }
 }
