@@ -331,7 +331,23 @@ class HomeFragment : Fragment() {
                         .setTitle("Update Available")
                         .setMessage("A new version ($latestVersion) is available. Would you like to download it?")
                         .setPositiveButton("Download") { _, _ ->
-                            updateManager.downloadAndInstallApk(downloadUrl, "NorwinLabsTools-Update.apk")
+                            val progressDialog = AlertDialog.Builder(requireContext())
+                                .setTitle("Downloading...")
+                                .setMessage("Please wait while the update downloads.")
+                                .setCancelable(false)
+                                .show()
+
+                            updateManager.downloadAndInstallApk(downloadUrl, "NorwinLabsTools-Update.apk", object : UpdateManager.UpdateCallback {
+                                override fun onUpdateAvailable(latestVersion: String, downloadUrl: String) {}
+                                override fun onNoUpdate() {}
+                                override fun onError(error: String, url: String) {
+                                    progressDialog.dismiss()
+                                    Toast.makeText(requireContext(), "Download Error: $error", Toast.LENGTH_LONG).show()
+                                }
+                                override fun onDownloadProgress(progress: Int) {
+                                    progressDialog.setMessage("Downloading: $progress%")
+                                }
+                            })
                         }
                         .setNegativeButton("Later", null)
                         .show()
@@ -353,6 +369,7 @@ class HomeFragment : Fragment() {
                         .setPositiveButton("OK", null).show()
                 }
             }
+            override fun onDownloadProgress(progress: Int) {}
         })
     }
 

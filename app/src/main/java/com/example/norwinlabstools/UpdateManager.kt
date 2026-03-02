@@ -1,23 +1,22 @@
 package com.example.norwinlabstools
 
-import android.app.DownloadManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import androidx.core.content.ContextCompat
+import android.os.Handler
+import android.os.Looper
 import androidx.core.content.FileProvider
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 
 class UpdateManager(private val context: Context) {
 
     private val client = OkHttpClient()
+    private val mainHandler = Handler(Looper.getMainLooper())
     
     private val GITHUB_OWNER = "NorwinLabs"
     private val GITHUB_REPO = "NorwinLabsTools"
@@ -27,6 +26,7 @@ class UpdateManager(private val context: Context) {
         fun onUpdateAvailable(latestVersion: String, downloadUrl: String)
         fun onNoUpdate()
         fun onError(error: String, url: String)
+        fun onDownloadProgress(progress: Int)
     }
 
     fun checkForUpdates(callback: UpdateCallback) {
@@ -57,47 +57,61 @@ class UpdateManager(private val context: Context) {
 
                     val currentVersion = getCurrentVersion()
                     if (isNewerVersion(latestVersion, currentVersion)) {
-                        callback.onUpdateAvailable(latestVersion, downloadUrl)
+                        mainHandler.post { callback.onUpdateAvailable(latestVersion, downloadUrl) }
                     } else {
-                        callback.onNoUpdate()
+                        mainHandler.post { callback.onNoUpdate() }
                     }
                 } else {
-                    callback.onError("GitHub returned ${response.code}", GITHUB_API_URL)
+                    mainHandler.post { callback.onError("GitHub returned ${response.code}", GITHUB_API_URL) }
                 }
             } catch (e: Exception) {
-                callback.onError("Network error: ${e.message}", GITHUB_API_URL)
+                mainHandler.post { callback.onError("Network error: ${e.message}", GITHUB_API_URL) }
             }
         }.start()
     }
 
-    fun downloadAndInstallApk(url: String, fileName: String) {
-        val destination = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
+    fun downloadAndInstallApk(url: String, fileName: String, callback: UpdateCallback) {
+        // Use internal cache directory for faster access and better security
+        val destination = File(context.cacheDir, fileName)
         if (destination.exists()) destination.delete()
 
-        val request = DownloadManager.Request(Uri.parse(url))
-            .setTitle("Downloading NorwinLabsTools Update")
-            .setDescription("Preparing to install version...")
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            .setDestinationUri(Uri.fromFile(destination))
-            .setAllowedOverMetered(true)
-            .setAllowedOverRoaming(true)
-
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val downloadId = downloadManager.enqueue(request)
-
-        val onComplete = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                if (id == downloadId) {
-                    installApk(destination)
-                    context.unregisterReceiver(this)
+        Thread {
+            try {
+                val request = Request.Builder().url(url).build()
+                val response = client.newCall(request).execute()
+                
+                if (!response.isSuccessful) {
+                    mainHandler.post { callback.onError("Download failed: ${response.code}", url) }
+                    return@Thread
                 }
+
+                val body = response.body
+                val contentLength = body?.contentLength() ?: -1
+                val inputStream: InputStream? = body?.byteStream()
+                val outputStream = FileOutputStream(destination)
+
+                val buffer = ByteArray(8192)
+                var bytesRead: Int
+                var totalBytesRead: Long = 0
+
+                inputStream?.use { input ->
+                    outputStream.use { output ->
+                        while (input.read(buffer).also { bytesRead = it } != -1) {
+                            output.write(buffer, 0, bytesRead)
+                            totalBytesRead += bytesRead
+                            if (contentLength > 0) {
+                                val progress = ((totalBytesRead * 100) / contentLength).toInt()
+                                mainHandler.post { callback.onDownloadProgress(progress) }
+                            }
+                        }
+                    }
+                }
+
+                mainHandler.post { installApk(destination) }
+            } catch (e: Exception) {
+                mainHandler.post { callback.onError("Download error: ${e.message}", url) }
             }
-        }
-        
-        val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        // Use ContextCompat to handle RECEIVER_EXPORTED requirement on API 34+
-        ContextCompat.registerReceiver(context, onComplete, filter, ContextCompat.RECEIVER_EXPORTED)
+        }.start()
     }
 
     private fun installApk(file: File) {
@@ -106,6 +120,8 @@ class UpdateManager(private val context: Context) {
             setDataAndType(uri, "application/vnd.android.package-archive")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            // Hint for the installer to be faster if possible
+            putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
         }
         context.startActivity(intent)
     }
