@@ -38,6 +38,7 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.TilesOverlay
+import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
@@ -345,6 +346,11 @@ class CircleShareFragment : Fragment() {
     private fun setupMap() {
         binding.mapView.setTileSource(TileSourceFactory.MAPNIK)
         binding.mapView.setMultiTouchControls(true)
+        
+        val rotationGestureOverlay = RotationGestureOverlay(binding.mapView)
+        rotationGestureOverlay.isEnabled = true
+        binding.mapView.overlays.add(rotationGestureOverlay)
+
         val mapController = binding.mapView.controller
         mapController.setZoom(15.0)
     }
